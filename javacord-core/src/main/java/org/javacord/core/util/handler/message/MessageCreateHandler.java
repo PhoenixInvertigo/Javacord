@@ -42,11 +42,13 @@ public class MessageCreateHandler extends PacketHandler {
         if (!packet.hasNonNull("guild_id") && !api.getTextChannelById(channelId).isPresent()) {
             UserImpl recipient = new UserImpl(api, packet.get("author"), (MemberImpl) null, null);
 
-            //create private channel
-            PrivateChannel privateChannel = new PrivateChannelImpl(api, channelId, recipient);
-            PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
+            if (!recipient.isYourself()) { // fails otherwise
+                // create private channel
+                PrivateChannel privateChannel = new PrivateChannelImpl(api, channelId, recipient);
+                PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
 
-            api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, recipient, event);
+                api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, recipient, event);
+            }
         }
 
         api.getTextChannelById(channelId).ifPresent(channel -> {
