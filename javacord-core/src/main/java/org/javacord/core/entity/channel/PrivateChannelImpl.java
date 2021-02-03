@@ -48,13 +48,24 @@ public class PrivateChannelImpl implements PrivateChannel, Cleanupable, Internal
      * @param data The json data of the channel.
      */
     public PrivateChannelImpl(DiscordApiImpl api, JsonNode data) {
+        this(api, data.get("id").asText(), new UserImpl(api, data.get("recipients").get(0), (MemberImpl) null, null));
+    }
+
+    /**
+     * Creates a new private channel.
+     *
+     * @param api The discord api instance.
+     * @param channelId The id of the channel.
+     * @param recipient The recipient of the channel.
+     */
+    public PrivateChannelImpl(DiscordApiImpl api, String channelId, UserImpl recipient) {
         this.api = api;
-        recipient = new UserImpl(api, data.get("recipients").get(0), (MemberImpl) null, null);
+        this.recipient = recipient;
         messageCache = new MessageCacheImpl(
                 api, api.getDefaultMessageCacheCapacity(), api.getDefaultMessageCacheStorageTimeInSeconds(),
                 api.isDefaultAutomaticMessageCacheCleanupEnabled());
 
-        id = Long.parseLong(data.get("id").asText());
+        id = Long.parseLong(channelId);
 
         api.addChannelToCache(this);
     }
