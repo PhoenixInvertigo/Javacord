@@ -130,7 +130,7 @@ public class ChannelCreateHandler extends PacketHandler {
 
         UserImpl recipient = new UserImpl(api, channel.get("recipients").get(0), (MemberImpl) null, null);
         if (!recipient.getPrivateChannel().isPresent()) {
-            PrivateChannel privateChannel = new PrivateChannelImpl(api, channel);
+            PrivateChannel privateChannel = new PrivateChannelImpl(api, channel.get("id").asText(), recipient);
             PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
 
             api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, recipient, event);
