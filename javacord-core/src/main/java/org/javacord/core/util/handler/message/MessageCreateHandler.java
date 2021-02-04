@@ -44,24 +44,24 @@ public class MessageCreateHandler extends PacketHandler {
         // if the message isn't from a server and the private channel isn't cached
         // See https://github.com/discord/discord-api-docs/issues/2248
         if (!packet.hasNonNull("guild_id") && !api.getTextChannelById(channelId).isPresent()) {
-            UserImpl recipient = new UserImpl(api, packet.get("author"), (MemberImpl) null, null);
+            UserImpl author = new UserImpl(api, packet.get("author"), (MemberImpl) null, null);
 
-            if (recipient.isYourself()) {
+            PrivateChannel privateChannel;
+            if (author.isYourself()) {
                 // request private channel from discord
-                new RestRequest<PrivateChannel>(api, RestMethod.GET, RestEndpoint.CHANNEL)
+                privateChannel = new RestRequest<PrivateChannel>(api, RestMethod.GET, RestEndpoint.CHANNEL)
                         .setUrlParameters(channelId)
-                        .execute(result ->
-                                new PrivateChannelImpl(api, result.getJsonBody()))
-                        .thenAccept(channel -> handle(channel, packet));
+                        .execute(result -> new PrivateChannelImpl(api, result.getJsonBody()))
+                        .join(); // wait for the result of the request to keep the order of events correct.
             } else {
                 // create private channel
-                PrivateChannel privateChannel = new PrivateChannelImpl(api, channelId, recipient);
-                PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
-
-                api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, recipient, event);
-
-                handle(privateChannel, packet);
+                privateChannel = new PrivateChannelImpl(api, channelId, author);
             }
+            // dispatch PrivateChannelCreateEvent
+            PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
+            api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, privateChannel.getRecipient(), event);
+
+            handle(privateChannel, packet);
             return;
         }
 
