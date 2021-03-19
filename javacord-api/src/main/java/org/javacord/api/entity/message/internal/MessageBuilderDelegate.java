@@ -274,6 +274,26 @@ public interface MessageBuilderDelegate {
     /**
      * Sends the message.
      *
+     * @param api The api instance needed to send and return the message.
+     * @param channelId The id of the channel in which the message should be sent.
+     * @return The sent message.
+     */
+    CompletableFuture<Message> send(DiscordApi api, String channelId);
+
+    /**
+     * Sends the message.
+     *
+     * @param api The api instance needed to send and return the message.
+     * @param channelId The id of the channel in which the message should be sent.
+     * @return The sent message.
+     */
+    default CompletableFuture<Message> send(DiscordApi api, long channelId) {
+        return send(api, Long.toUnsignedString(channelId));
+    }
+
+    /**
+     * Sends the message.
+     *
      * @param webhook The webhook from which the message should be sent.
      * @return The sent message.
      */

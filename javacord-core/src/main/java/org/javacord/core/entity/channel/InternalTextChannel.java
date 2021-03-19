@@ -54,11 +54,7 @@ public interface InternalTextChannel extends TextChannel, InternalTextChannelAtt
 
     @Override
     default CompletableFuture<Message> getMessageById(long id) {
-        return getApi().getCachedMessageById(id)
-                .map(CompletableFuture::completedFuture)
-                .orElseGet(() -> new RestRequest<Message>(getApi(), RestMethod.GET, RestEndpoint.MESSAGE)
-                .setUrlParameters(getIdAsString(), Long.toUnsignedString(id))
-                .execute(result -> ((DiscordApiImpl) getApi()).getOrCreateMessage(this, result.getJsonBody())));
+        return getApi().getMessageById(id, getId());
     }
 
     @Override

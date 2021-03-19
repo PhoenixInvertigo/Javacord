@@ -101,7 +101,7 @@ public class ChannelDeleteHandler extends PacketHandler {
                 .ifPresent(channel -> {
                     dispatchServerChannelDeleteEvent(channel);
                     api.forEachCachedMessageWhere(
-                            msg -> msg.getChannel().getId() == channelId,
+                            msg -> msg.getChannelId() == channelId,
                             msg -> api.removeMessageFromCache(msg.getId())
                     );
                 });
@@ -171,7 +171,7 @@ public class ChannelDeleteHandler extends PacketHandler {
             api.removeObjectListeners(TextChannel.class, channelId);
             api.removeObjectListeners(Channel.class, channelId);
             api.forEachCachedMessageWhere(
-                    msg -> msg.getChannel().getId() == groupChannel.getId(),
+                    msg -> msg.getChannelId() == groupChannel.getId(),
                     msg -> api.removeMessageFromCache(msg.getId())
             );
         });

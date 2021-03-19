@@ -3,6 +3,7 @@ package org.javacord.core.util.handler.message.reaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.reaction.ReactionRemoveAllEvent;
@@ -29,22 +30,23 @@ public class MessageReactionRemoveAllHandler extends PacketHandler {
 
     @Override
     public void handle(JsonNode packet) {
-        api.getTextChannelById(packet.get("channel_id").asText()).ifPresent(channel -> {
-            long messageId = packet.get("message_id").asLong();
-            Optional<Message> message = api.getCachedMessageById(messageId);
+        long messageId = packet.get("message_id").asLong();
+        long channelId = packet.get("channel_id").asLong();
 
-            message.ifPresent(msg -> ((MessageImpl) msg).removeAllReactionsFromCache());
+        Optional<Message> message = api.getCachedMessageById(messageId);
+        Optional<TextChannel> channel = api.getTextChannelById(channelId);
 
-            ReactionRemoveAllEvent event = new ReactionRemoveAllEventImpl(api, messageId, channel);
+        message.ifPresent(msg -> ((MessageImpl) msg).removeAllReactionsFromCache());
 
-            Optional<Server> optionalServer = channel.asServerChannel().map(ServerChannel::getServer);
-            api.getEventDispatcher().dispatchReactionRemoveAllEvent(
-                    optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),
-                    messageId,
-                    optionalServer.orElse(null),
-                    channel,
-                    event);
-        });
+        ReactionRemoveAllEvent event = new ReactionRemoveAllEventImpl(api, messageId, channelId);
+
+        Optional<Server> optionalServer = channel.flatMap(TextChannel::asServerChannel).map(ServerChannel::getServer);
+        api.getEventDispatcher().dispatchReactionRemoveAllEvent(
+                optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),
+                messageId,
+                optionalServer.orElse(null),
+                channel.orElse(null),
+                event);
     }
 
 }

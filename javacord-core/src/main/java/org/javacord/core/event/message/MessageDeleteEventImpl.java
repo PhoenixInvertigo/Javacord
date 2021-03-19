@@ -1,7 +1,6 @@
 package org.javacord.core.event.message;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.event.message.MessageDeleteEvent;
 
 /**
@@ -14,10 +13,10 @@ public class MessageDeleteEventImpl extends OptionalMessageEventImpl implements 
      *
      * @param api The discord api instance.
      * @param messageId The id of the message.
-     * @param channel The text channel in which the message was sent.
+     * @param channelId The text channel in which the message was sent.
      */
-    public MessageDeleteEventImpl(DiscordApi api, long messageId, TextChannel channel) {
-        super(api, messageId, channel);
+    public MessageDeleteEventImpl(DiscordApi api, long messageId, long channelId) {
+        super(api, messageId, channelId);
     }
 
 }

@@ -314,6 +314,15 @@ public class MessageBuilderDelegateImpl implements MessageBuilderDelegate {
 
     @Override
     public CompletableFuture<Message> send(TextChannel channel) {
+        return send(channel.getApi(), channel.getIdAsString(), channel);
+    }
+
+    @Override
+    public CompletableFuture<Message> send(DiscordApi api, String channelId) {
+        return send(api, channelId, null);
+    }
+
+    private CompletableFuture<Message> send(DiscordApi api, String channelId, TextChannel channel) {
         ObjectNode body = JsonNodeFactory.instance.objectNode()
                 .put("content", toString() == null ? "" : toString())
                 .put("tts", tts);
@@ -335,12 +344,12 @@ public class MessageBuilderDelegateImpl implements MessageBuilderDelegate {
             body.putObject("message_reference").put("message_id", replyingTo);
         }
 
-        RestRequest<Message> request = new RestRequest<Message>(channel.getApi(), RestMethod.POST, RestEndpoint.MESSAGE)
-                .setUrlParameters(channel.getIdAsString());
+        RestRequest<Message> request = new RestRequest<Message>(api, RestMethod.POST, RestEndpoint.MESSAGE)
+                .setUrlParameters(channelId);
         if (!attachments.isEmpty() || (embeds.size() > 0 && embeds.get(0).requiresAttachments())) {
             CompletableFuture<Message> future = new CompletableFuture<>();
             // We access files etc. so this should be async
-            channel.getApi().getThreadPool().getExecutorService().submit(() -> {
+            api.getThreadPool().getExecutorService().submit(() -> {
                 try {
                     List<FileContainer> tempAttachments = new ArrayList<>(attachments);
                     // Add the attachments required for the embed
@@ -349,9 +358,9 @@ public class MessageBuilderDelegateImpl implements MessageBuilderDelegate {
                                 ((EmbedBuilderDelegateImpl) embeds.get(0).getDelegate()).getRequiredAttachments());
                     }
 
-                    addMultipartBodyToRequest(request, body, tempAttachments, channel.getApi());
+                    addMultipartBodyToRequest(request, body, tempAttachments, api);
 
-                    request.execute(result -> ((DiscordApiImpl) channel.getApi())
+                    request.execute(result -> ((DiscordApiImpl) api)
                             .getOrCreateMessage(channel, result.getJsonBody()))
                             .whenComplete((message, throwable) -> {
                                 if (throwable != null) {
@@ -367,7 +376,7 @@ public class MessageBuilderDelegateImpl implements MessageBuilderDelegate {
             return future;
         } else {
             request.setBody(body);
-            return request.execute(result -> ((DiscordApiImpl) channel.getApi())
+            return request.execute(result -> ((DiscordApiImpl) api)
                     .getOrCreateMessage(channel, result.getJsonBody()));
         }
     }
@@ -497,9 +506,7 @@ public class MessageBuilderDelegateImpl implements MessageBuilderDelegate {
         if (wait) {
             tmpFuture = request.execute(result -> {
                 JsonNode body = result.getJsonBody();
-                TextChannel channel = api.getTextChannelById(body.get("channel_id").asText()).orElseThrow(() ->
-                        new IllegalStateException("Cannot return a message when the channel isn't cached!")
-                );
+                TextChannel channel = api.getTextChannelById(body.get("channel_id").asText()).orElse(null);
                 return ((DiscordApiImpl) api).getOrCreateMessage(channel, body);
             });
         } else {

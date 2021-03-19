@@ -1,5 +1,6 @@
 package org.javacord.api.event.message;
 
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageAuthor;
@@ -7,6 +8,7 @@ import org.javacord.api.entity.message.MessageAuthor;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A message event where the message is NOT guaranteed to be in the cache.
@@ -68,5 +70,15 @@ public interface OptionalMessageEvent extends MessageEvent {
      */
     default Optional<URL> getMessageLink() {
         return getMessage().map(Message::getLink);
+    }
+
+    /**
+     * Requests a message from Discord, if it's not cached.
+     *
+     * @return The message either from the cache or directly from Discord.
+     * @see TextChannel#getMessageById(long)
+     */
+    default CompletableFuture<Message> requestMessage() {
+        return getApi().getMessageById(getMessageId(), getChannelId());
     }
 }

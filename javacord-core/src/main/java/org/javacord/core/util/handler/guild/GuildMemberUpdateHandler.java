@@ -112,7 +112,7 @@ public class GuildMemberUpdateHandler extends PacketHandler {
                                 .map(ServerTextChannel::getId)
                                 .collect(Collectors.toSet());
                         api.forEachCachedMessageWhere(
-                                msg -> unreadableChannels.contains(msg.getChannel().getId()),
+                                msg -> unreadableChannels.contains(msg.getChannelId()),
                                 msg -> api.removeMessageFromCache(msg.getId())
                         );
                     }

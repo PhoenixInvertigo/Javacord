@@ -3,6 +3,7 @@ package org.javacord.core.util.handler.message;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageDeleteEvent;
@@ -31,19 +32,22 @@ public class MessageDeleteHandler extends PacketHandler {
         long messageId = packet.get("id").asLong();
         long channelId = packet.get("channel_id").asLong();
 
-        api.getTextChannelById(channelId).ifPresent(channel -> {
-            MessageDeleteEvent event = new MessageDeleteEventImpl(api, messageId, channel);
+        Optional<TextChannel> channelOptional = api.getTextChannelById(channelId);
 
-            api.removeMessageFromCache(messageId);
+        MessageDeleteEvent event = new MessageDeleteEventImpl(api, messageId, channelId);
 
-            Optional<Server> optionalServer = channel.asServerChannel().map(ServerChannel::getServer);
-            api.getEventDispatcher().dispatchMessageDeleteEvent(
-                    optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),
-                    messageId,
-                    optionalServer.orElse(null),
-                    channel,
-                    event);
-            api.removeObjectListeners(Message.class, messageId);
-        });
+        api.removeMessageFromCache(messageId);
+
+        Optional<Server> optionalServer = channelOptional
+                .flatMap(TextChannel::asServerChannel)
+                .map(ServerChannel::getServer);
+        api.getEventDispatcher().dispatchMessageDeleteEvent(
+                optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),
+                messageId,
+                optionalServer.orElse(null),
+                channelOptional.orElse(null),
+                event);
+        api.removeObjectListeners(Message.class, messageId);
+
     }
 }

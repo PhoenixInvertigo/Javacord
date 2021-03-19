@@ -3,6 +3,7 @@ package org.javacord.core.util.handler.message.reaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
@@ -34,37 +35,38 @@ public class MessageReactionAddHandler extends PacketHandler {
 
     @Override
     public void handle(JsonNode packet) {
-        api.getTextChannelById(packet.get("channel_id").asText()).ifPresent(channel -> {
-            long messageId = packet.get("message_id").asLong();
-            long userId = packet.get("user_id").asLong();
-            Server server = channel.asServerChannel().map(ServerChannel::getServer).orElse(null);
-            Member member = null;
-            if (packet.hasNonNull("member")) {
-                member = new MemberImpl(api, (ServerImpl) server, packet.get("member"), null);
-            }
-            Optional<Message> message = api.getCachedMessageById(messageId);
+        long messageId = packet.get("message_id").asLong();
+        long userId = packet.get("user_id").asLong();
 
-            Emoji emoji;
-            JsonNode emojiJson = packet.get("emoji");
-            if (!emojiJson.has("id") || emojiJson.get("id").isNull()) {
-                emoji = UnicodeEmojiImpl.fromString(emojiJson.get("name").asText());
-            } else {
-                emoji = api.getKnownCustomEmojiOrCreateCustomEmoji(emojiJson);
-            }
+        long channelId = packet.get("channel_id").asLong();
+        Optional<TextChannel> channelOptional = api.getTextChannelById(channelId);
 
-            message.ifPresent(msg -> ((MessageImpl) msg).addReaction(emoji, userId == api.getYourself().getId()));
+        Optional<Server> server = channelOptional.flatMap(TextChannel::asServerChannel).map(ServerChannel::getServer);
+        Member member = null;
+        if (packet.hasNonNull("member")) {
+            member = new MemberImpl(api, (ServerImpl) server.orElse(null), packet.get("member"), null);
+        }
 
-            ReactionAddEvent event = new ReactionAddEventImpl(api, messageId, channel, emoji, userId, member);
+        Emoji emoji;
+        JsonNode emojiJson = packet.get("emoji");
+        if (!emojiJson.has("id") || emojiJson.get("id").isNull()) {
+            emoji = UnicodeEmojiImpl.fromString(emojiJson.get("name").asText());
+        } else {
+            emoji = api.getKnownCustomEmojiOrCreateCustomEmoji(emojiJson);
+        }
 
-            Optional<Server> optionalServer = channel.asServerChannel().map(ServerChannel::getServer);
-            api.getEventDispatcher().dispatchReactionAddEvent(
-                    optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),
-                    messageId,
-                    optionalServer.orElse(null),
-                    channel,
-                    userId,
-                    event);
-        });
+        Optional<Message> message = api.getCachedMessageById(messageId);
+        message.ifPresent(msg -> ((MessageImpl) msg).addReaction(emoji, userId == api.getYourself().getId()));
+
+        ReactionAddEvent event = new ReactionAddEventImpl(api, messageId, channelId, emoji, userId, member);
+
+        api.getEventDispatcher().dispatchReactionAddEvent(
+                server.map(DispatchQueueSelector.class::cast).orElse(api),
+                messageId,
+                server.orElse(null),
+                channelOptional.orElse(null),
+                userId,
+                event);
     }
 
 }

@@ -28,9 +28,9 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
     private final long messageId;
 
     /**
-     * The text channel in which the message was sent.
+     * The id of the text channel in which the message was sent.
      */
-    private final TextChannel channel;
+    private final long channelId;
 
     /**
      * Creates a new message event.
@@ -38,7 +38,7 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
      * @param message The message.
      */
     public MessageEventImpl(Message message) {
-        this(message.getApi(), message.getId(), message.getChannel());
+        this(message.getApi(), message.getId(), message.getChannelId());
     }
 
     /**
@@ -46,12 +46,12 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
      *
      * @param api The discord api instance.
      * @param messageId The id of the message.
-     * @param channel The text channel in which the message was sent.
+     * @param channelId The text channel in which the message was sent.
      */
-    public MessageEventImpl(DiscordApi api, long messageId, TextChannel channel) {
+    public MessageEventImpl(DiscordApi api, long messageId, long channelId) {
         super(api);
         this.messageId = messageId;
-        this.channel = channel;
+        this.channelId = channelId;
     }
 
     @Override
@@ -60,13 +60,13 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
     }
 
     @Override
-    public TextChannel getChannel() {
-        return channel;
+    public long getChannelId() {
+        return channelId;
     }
 
     @Override
     public Optional<Server> getServer() {
-        return getChannel().asServerChannel().map(ServerChannel::getServer);
+        return getChannel().flatMap(TextChannel::asServerChannel).map(ServerChannel::getServer);
     }
 
     @Override
@@ -76,32 +76,32 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
 
     @Override
     public CompletableFuture<Void> deleteMessage(String reason) {
-        return Message.delete(getApi(), getChannel().getId(), getMessageId(), reason);
+        return Message.delete(getApi(), getChannelId(), getMessageId(), reason);
     }
 
     @Override
     public CompletableFuture<Message> editMessage(String content) {
-        return Message.edit(getApi(), getChannel().getId(), getMessageId(), content, null);
+        return Message.edit(getApi(), getChannelId(), getMessageId(), content, null);
     }
 
     @Override
     public CompletableFuture<Message> editMessage(EmbedBuilder embed) {
-        return Message.edit(getApi(), getChannel().getId(), getMessageId(), null, embed);
+        return Message.edit(getApi(), getChannelId(), getMessageId(), null, embed);
     }
 
     @Override
     public CompletableFuture<Message> editMessage(String content, EmbedBuilder embed) {
-        return Message.edit(getApi(), getChannel().getId(), getMessageId(), content, embed);
+        return Message.edit(getApi(), getChannelId(), getMessageId(), content, embed);
     }
 
     @Override
     public CompletableFuture<Void> addReactionToMessage(String unicodeEmoji) {
-        return Message.addReaction(getApi(), getChannel().getId(), getMessageId(), unicodeEmoji);
+        return Message.addReaction(getApi(), getChannelId(), getMessageId(), unicodeEmoji);
     }
 
     @Override
     public CompletableFuture<Void> addReactionToMessage(Emoji emoji) {
-        return Message.addReaction(getApi(), getChannel().getId(), getMessageId(), emoji);
+        return Message.addReaction(getApi(), getChannelId(), getMessageId(), emoji);
     }
 
     @Override
@@ -120,12 +120,12 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
 
     @Override
     public CompletableFuture<Void> removeAllReactionsFromMessage() {
-        return Message.removeAllReactions(getApi(), getChannel().getId(), getMessageId());
+        return Message.removeAllReactions(getApi(), getChannelId(), getMessageId());
     }
 
     @Override
     public CompletableFuture<Void> removeReactionByEmojiFromMessage(User user, Emoji emoji) {
-        return Reaction.removeUser(getApi(), getChannel().getId(), getMessageId(), emoji, user.getId());
+        return Reaction.removeUser(getApi(), getChannelId(), getMessageId(), emoji, user.getId());
     }
 
     @Override
@@ -135,10 +135,10 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
 
     @Override
     public CompletableFuture<Void> removeReactionByEmojiFromMessage(Emoji emoji) {
-        return Reaction.getUsers(getApi(), getChannel().getId(), getMessageId(), emoji)
+        return Reaction.getUsers(getApi(), getChannelId(), getMessageId(), emoji)
                 .thenCompose(users -> CompletableFuture.allOf(
                         users.stream()
-                                .map(user -> Reaction.removeUser(getApi(), getChannel().getId(),
+                                .map(user -> Reaction.removeUser(getApi(), getChannelId(),
                                         getMessageId(), emoji, user.getId()))
                                 .toArray(CompletableFuture[]::new)));
     }
@@ -202,12 +202,12 @@ public abstract class MessageEventImpl extends EventImpl implements MessageEvent
 
     @Override
     public CompletableFuture<Void> pinMessage() {
-        return Message.pin(getApi(), getChannel().getId(), getMessageId());
+        return Message.pin(getApi(), getChannelId(), getMessageId());
     }
 
     @Override
     public CompletableFuture<Void> unpinMessage() {
-        return Message.unpin(getApi(), getChannel().getId(), getMessageId());
+        return Message.unpin(getApi(), getChannelId(), getMessageId());
     }
 
 }

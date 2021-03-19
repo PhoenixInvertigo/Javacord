@@ -1619,6 +1619,17 @@ public class DiscordApiImpl implements DiscordApi, DispatchQueueSelector {
     }
 
     @Override
+    public CompletableFuture<Message> getMessageById(long messageId, long channelId) {
+        return getCachedMessageById(messageId)
+                .map(CompletableFuture::completedFuture)
+                .orElseGet(() -> new RestRequest<Message>(this, RestMethod.GET, RestEndpoint.MESSAGE)
+                        .setUrlParameters(Long.toUnsignedString(channelId), Long.toUnsignedString(messageId))
+                        .execute(result ->
+                                getOrCreateMessage(getTextChannelById(channelId).orElse(null), result.getJsonBody())
+                        ));
+    }
+
+    @Override
     public Collection<Long> getUnavailableServers() {
         return Collections.unmodifiableCollection(unavailableServers);
     }

@@ -144,7 +144,7 @@ public class UncachedMessageUtilImpl implements UncachedMessageUtil, InternalUnc
     public CompletableFuture<Void> delete(Message... messages) {
         return CompletableFuture.allOf(
                 Arrays.stream(messages)
-                        .collect(Collectors.groupingBy(message -> message.getChannel().getId(),
+                        .collect(Collectors.groupingBy(message -> message.getChannelId(),
                                 Collectors.mapping(Message::getId, Collectors.toList())))
                         .entrySet().stream()
                         .map(entry -> delete(entry.getKey(),

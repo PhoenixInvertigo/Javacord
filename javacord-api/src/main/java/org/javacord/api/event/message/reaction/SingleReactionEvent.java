@@ -3,7 +3,7 @@ package org.javacord.api.event.message.reaction;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Reaction;
 import org.javacord.api.entity.user.User;
-import org.javacord.api.event.message.RequestableMessageEvent;
+import org.javacord.api.event.message.OptionalMessageEvent;
 import org.javacord.api.event.user.OptionalUserEvent;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public interface SingleReactionEvent extends ReactionEvent, OptionalUserEvent {
      * If the message is not cached, it will be requested from Discord first.
      *
      * @return The reaction.
-     * @see RequestableMessageEvent#requestMessage()
+     * @see OptionalMessageEvent#requestMessage()
      */
     CompletableFuture<Optional<Reaction>> requestReaction();
 
@@ -50,7 +50,7 @@ public interface SingleReactionEvent extends ReactionEvent, OptionalUserEvent {
      * If the message is not cached, it will be requested from Discord first.
      *
      * @return The amount of users who used the reaction.
-     * @see RequestableMessageEvent#requestMessage()
+     * @see OptionalMessageEvent#requestMessage()
      */
     CompletableFuture<Integer> requestCount();
 

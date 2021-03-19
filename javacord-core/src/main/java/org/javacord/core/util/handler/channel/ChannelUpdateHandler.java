@@ -243,7 +243,7 @@ public class ChannelUpdateHandler extends PacketHandler {
 
         if (areYouAffected.get() && !channel.canYouSee()) {
             api.forEachCachedMessageWhere(
-                    msg -> msg.getChannel().getId() == channelId,
+                    msg -> msg.getChannelId() == channelId,
                     msg -> api.removeMessageFromCache(msg.getId())
             );
         }

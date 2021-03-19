@@ -7,7 +7,6 @@ import org.javacord.api.entity.UpdatableFromCache;
 import org.javacord.api.entity.channel.ChannelType;
 import org.javacord.api.entity.channel.GroupChannel;
 import org.javacord.api.entity.channel.PrivateChannel;
-import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.emoji.CustomEmoji;
@@ -80,7 +79,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The new message object.
      */
     default CompletableFuture<Message> crossPost() {
-        return crossPost(getApi(), getChannel().getId(), getId());
+        return crossPost(getApi(), getChannelId(), getId());
     }
 
     /**
@@ -149,7 +148,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the deletion was successful.
      */
     default CompletableFuture<Void> delete(String reason) {
-        return Message.delete(getApi(), getChannel().getId(), getId(), reason);
+        return Message.delete(getApi(), getChannelId(), getId(), reason);
     }
 
     /**
@@ -333,7 +332,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the update was successful.
      */
     default CompletableFuture<Message> edit(String content) {
-        return Message.edit(getApi(), getChannel().getId(), getId(), content, true, null, false);
+        return Message.edit(getApi(), getChannelId(), getId(), content, true, null, false);
     }
 
     /**
@@ -343,7 +342,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the update was successful.
      */
     default CompletableFuture<Message> edit(EmbedBuilder embed) {
-        return Message.edit(getApi(), getChannel().getId(), getId(), null, false, embed, true);
+        return Message.edit(getApi(), getChannelId(), getId(), null, false, embed, true);
     }
 
     /**
@@ -354,7 +353,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the update was successful.
      */
     default CompletableFuture<Message> edit(String content, EmbedBuilder embed) {
-        return Message.edit(getApi(), getChannel().getId(), getId(), content, true, embed, true);
+        return Message.edit(getApi(), getChannelId(), getId(), content, true, embed, true);
     }
 
     /**
@@ -387,7 +386,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the removal was successful.
      */
     default CompletableFuture<Message> removeContent() {
-        return Message.edit(getApi(), getChannel().getId(), getId(), null, true, null, false);
+        return Message.edit(getApi(), getChannelId(), getId(), null, true, null, false);
     }
 
 
@@ -421,7 +420,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the removal was successful.
      */
     default CompletableFuture<Message> removeEmbed() {
-        return Message.edit(getApi(), getChannel().getId(), getId(), null, false, null, true);
+        return Message.edit(getApi(), getChannelId(), getId(), null, false, null, true);
     }
 
     /**
@@ -454,7 +453,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to check if the removal was successful.
      */
     default CompletableFuture<Message> removeContentAndEmbed() {
-        return Message.edit(getApi(), getChannel().getId(), getId(), null, true, null, true);
+        return Message.edit(getApi(), getChannelId(), getId(), null, true, null, true);
     }
 
 
@@ -493,7 +492,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the action was successful.
      */
     default CompletableFuture<Void> addReaction(Emoji emoji) {
-        return Message.addReaction(getApi(), getChannel().getId(), getId(), emoji);
+        return Message.addReaction(getApi(), getChannelId(), getId(), emoji);
     }
 
 
@@ -518,7 +517,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the action was successful.
      */
     default CompletableFuture<Void> addReaction(String unicodeEmoji) {
-        return Message.addReaction(getApi(), getChannel().getId(), getId(), unicodeEmoji);
+        return Message.addReaction(getApi(), getChannelId(), getId(), unicodeEmoji);
     }
 
     /**
@@ -564,7 +563,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the deletion was successful.
      */
     default CompletableFuture<Void> removeAllReactions() {
-        return Message.removeAllReactions(getApi(), getChannel().getId(), getId());
+        return Message.removeAllReactions(getApi(), getChannelId(), getId());
     }
 
     /**
@@ -597,7 +596,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the pin was successful.
      */
     default CompletableFuture<Void> pin() {
-        return Message.pin(getApi(), getChannel().getId(), getId());
+        return Message.pin(getApi(), getChannelId(), getId());
     }
 
     /**
@@ -630,7 +629,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the action was successful.
      */
     default CompletableFuture<Void> unpin() {
-        return Message.unpin(getApi(), getChannel().getId(), getId());
+        return Message.unpin(getApi(), getChannelId(), getId());
     }
 
     /**
@@ -686,7 +685,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
             return new URL("https://" + Javacord.DISCORD_DOMAIN + "/channels/"
                     + getServer().map(DiscordEntity::getIdAsString).orElse("@me")
                     + "/"
-                    + getChannel().getIdAsString()
+                    + getChannelIdAsString()
                     + "/"
                     + getIdAsString());
         } catch (MalformedURLException e) {
@@ -713,7 +712,23 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      *
      * @return The text channel of the message.
      */
-    TextChannel getChannel();
+    Optional<TextChannel> getChannel();
+
+    /**
+     * Gets the id of the text channel of the message.
+     *
+     * @return The id of the text channel of the message.
+     */
+    long getChannelId();
+
+    /**
+     * Gets the id of the text channel of the message.
+     *
+     * @return The id of the text channel of the message.
+     */
+    default String getChannelIdAsString() {
+        return Long.toUnsignedString(getChannelId());
+    }
 
     /**
      * Gets the activity of the message.
@@ -792,8 +807,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      */
     default Optional<CompletableFuture<Message>> requestReferencedMessage() {
         return getReferencedMessageId().map(id ->
-                        getReferencedMessage().map(CompletableFuture::completedFuture)
-                .orElseGet(() -> getApi().getMessageById(id, getChannel())));
+                getReferencedMessage().map(CompletableFuture::completedFuture)
+                        .orElseGet(() -> getApi().getMessageById(id, getChannelId())));
     }
 
 
@@ -862,9 +877,9 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return Whether or not the message was sent in a private channel.
      * @deprecated Use {@link Message#isPrivateMessage()} instead.
      */
-    @Deprecated // Deprecated to be consistent with #isServerMessage() and #isGroupMessage()
+    @Deprecated // Deprecated to be consistent with #isServerMessage()
     default boolean isPrivate() {
-        return getChannel().getType() == ChannelType.PRIVATE_CHANNEL;
+        return isPrivateMessage();
     }
 
     /**
@@ -873,7 +888,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return Whether or not the message was sent in a private channel.
      */
     default boolean isPrivateMessage() {
-        return getChannel().getType() == ChannelType.PRIVATE_CHANNEL;
+        return !isServerMessage();
     }
 
     /**
@@ -881,18 +896,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      *
      * @return Whether or not the message was sent in a server channel.
      */
-    default boolean isServerMessage() {
-        return getChannel().getType() == ChannelType.SERVER_TEXT_CHANNEL;
-    }
-
-    /**
-     * Checks if the message was sent in a {@link ChannelType#GROUP_CHANNEL group channel}.
-     *
-     * @return Whether or not the message was sent in a group channel.
-     */
-    default boolean isGroupMessage() {
-        return getChannel().getType() == ChannelType.GROUP_CHANNEL;
-    }
+    boolean isServerMessage();
 
     /**
      * Gets a reaction by its emoji.
@@ -945,7 +949,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return A future to tell us if the deletion was successful.
      */
     default CompletableFuture<Void> removeReactionByEmoji(User user, Emoji emoji) {
-        return Reaction.removeUser(getApi(), getChannel().getId(), getId(), emoji, user.getId());
+        return Reaction.removeUser(getApi(), getChannelId(), getId(), emoji, user.getId());
     }
 
     /**
@@ -1066,7 +1070,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The server text channel.
      */
     default Optional<ServerTextChannel> getServerTextChannel() {
-        return Optional.ofNullable(getChannel() instanceof ServerTextChannel ? (ServerTextChannel) getChannel() : null);
+        return getChannel().flatMap(TextChannel::asServerTextChannel);
     }
 
     /**
@@ -1076,7 +1080,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The private channel.
      */
     default Optional<PrivateChannel> getPrivateChannel() {
-        return Optional.ofNullable(getChannel() instanceof PrivateChannel ? (PrivateChannel) getChannel() : null);
+        return getChannel().flatMap(TextChannel::asPrivateChannel);
     }
 
     /**
@@ -1086,8 +1090,15 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The group channel.
      */
     default Optional<GroupChannel> getGroupChannel() {
-        return Optional.ofNullable(getChannel() instanceof GroupChannel ? (GroupChannel) getChannel() : null);
+        return getChannel().flatMap(TextChannel::asGroupChannel);
     }
+
+    /**
+     * Gets the id of the server of the message.
+     *
+     * @return The id of the server of the message.
+     */
+    Optional<Long> getServerId();
 
     /**
      * Gets the server of the message.
@@ -1095,7 +1106,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The server of the message.
      */
     default Optional<Server> getServer() {
-        return getServerTextChannel().map(ServerChannel::getServer);
+        return getServerId().flatMap(id -> getApi().getServerById(id));
     }
 
     /**
@@ -1106,8 +1117,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBefore(int, long)
      * @see #getMessagesBeforeAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesBefore(int limit) {
-        return getChannel().getMessagesBefore(limit, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBefore(int limit) {
+        return getChannel().map(channel -> channel.getMessagesBefore(limit, this));
     }
 
     /**
@@ -1119,8 +1130,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBefore(int, long)
      * @see #getMessagesBeforeAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesBeforeUntil(Predicate<Message> condition) {
-        return getChannel().getMessagesBeforeUntil(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBeforeUntil(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesBeforeUntil(condition, this));
     }
 
     /**
@@ -1132,8 +1143,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBeforeWhile(Predicate, long)
      * @see #getMessagesBeforeAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesBeforeWhile(Predicate<Message> condition) {
-        return getChannel().getMessagesBeforeWhile(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBeforeWhile(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesBeforeWhile(condition, this));
     }
 
     /**
@@ -1146,8 +1157,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBeforeAsStream(long)
      * @see #getMessagesBefore(int)
      */
-    default Stream<Message> getMessagesBeforeAsStream() {
-        return getChannel().getMessagesBeforeAsStream(this);
+    default Optional<Stream<Message>> getMessagesBeforeAsStream() {
+        return getChannel().map(channel -> channel.getMessagesBeforeAsStream(this));
     }
 
     /**
@@ -1158,8 +1169,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAfter(int, long)
      * @see #getMessagesAfterAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAfter(int limit) {
-        return getChannel().getMessagesAfter(limit, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAfter(int limit) {
+        return getChannel().map(channel -> channel.getMessagesAfter(limit, this));
     }
 
     /**
@@ -1171,8 +1182,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAfter(int, long)
      * @see #getMessagesAfterAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAfterUntil(Predicate<Message> condition) {
-        return getChannel().getMessagesAfterUntil(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAfterUntil(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesAfterUntil(condition, this));
     }
 
     /**
@@ -1184,8 +1195,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAfterWhile(Predicate, long)
      * @see #getMessagesAfterAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAfterWhile(Predicate<Message> condition) {
-        return getChannel().getMessagesAfterWhile(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAfterWhile(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesAfterWhile(condition, this));
     }
 
     /**
@@ -1198,8 +1209,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAfterAsStream(long)
      * @see #getMessagesAfter(int)
      */
-    default Stream<Message> getMessagesAfterAsStream() {
-        return getChannel().getMessagesAfterAsStream(this);
+    default Optional<Stream<Message>> getMessagesAfterAsStream() {
+        return getChannel().map(channel -> channel.getMessagesAfterAsStream(this));
     }
 
     /**
@@ -1214,8 +1225,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAround(int, long)
      * @see #getMessagesAroundAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAround(int limit) {
-        return getChannel().getMessagesAround(limit, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAround(int limit) {
+        return getChannel().map(channel -> channel.getMessagesAround(limit, this));
     }
 
     /**
@@ -1232,8 +1243,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAround(int, long)
      * @see #getMessagesAroundAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAroundUntil(Predicate<Message> condition) {
-        return getChannel().getMessagesAroundUntil(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAroundUntil(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesAroundUntil(condition, this));
     }
 
     /**
@@ -1250,8 +1261,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAroundWhile(Predicate, long)
      * @see #getMessagesAroundAsStream()
      */
-    default CompletableFuture<MessageSet> getMessagesAroundWhile(Predicate<Message> condition) {
-        return getChannel().getMessagesAroundWhile(condition, this);
+    default Optional<CompletableFuture<MessageSet>> getMessagesAroundWhile(Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesAroundWhile(condition, this));
     }
 
     /**
@@ -1267,8 +1278,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesAroundAsStream(long)
      * @see #getMessagesAround(int)
      */
-    default Stream<Message> getMessagesAroundAsStream() {
-        return getChannel().getMessagesAroundAsStream(this);
+    default Optional<Stream<Message>> getMessagesAroundAsStream() {
+        return getChannel().map(channel -> channel.getMessagesAroundAsStream(this));
     }
 
     /**
@@ -1279,8 +1290,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetween(long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetween(long other) {
-        return getChannel().getMessagesBetween(getId(), other);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetween(long other) {
+        return getChannel().map(channel -> channel.getMessagesBetween(getId(), other));
     }
 
     /**
@@ -1291,7 +1302,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetween(long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetween(Message other) {
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetween(Message other) {
         return getMessagesBetween(other.getId());
     }
 
@@ -1306,8 +1317,9 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenUntil(Predicate, long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetweenUntil(long other, Predicate<Message> condition) {
-        return getChannel().getMessagesBetweenUntil(condition, getId(), other);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetweenUntil(long other,
+                                                                            Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesBetweenUntil(condition, getId(), other));
     }
 
     /**
@@ -1321,7 +1333,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenUntil(Predicate, long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetweenUntil(Message other, Predicate<Message> condition) {
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetweenUntil(Message other,
+                                                                            Predicate<Message> condition) {
         return getMessagesBetweenUntil(other.getId(), condition);
     }
 
@@ -1336,8 +1349,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenWhile(Predicate, long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetweenWhile(long other, Predicate<Message> condition) {
-        return getChannel().getMessagesBetweenWhile(condition, getId(), other);
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetweenWhile(long other, Predicate<Message> condition) {
+        return getChannel().map(channel -> channel.getMessagesBetweenWhile(condition, getId(), other));
     }
 
     /**
@@ -1351,7 +1364,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenWhile(Predicate, long, long)
      * @see #getMessagesBetweenAsStream(long)
      */
-    default CompletableFuture<MessageSet> getMessagesBetweenWhile(Message other, Predicate<Message> condition) {
+    default Optional<CompletableFuture<MessageSet>> getMessagesBetweenWhile(Message other,
+                                                                            Predicate<Message> condition) {
         return getMessagesBetweenWhile(other.getId(), condition);
     }
 
@@ -1367,8 +1381,8 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenAsStream(long, long)
      * @see #getMessagesBetween(long)
      */
-    default Stream<Message> getMessagesBetweenAsStream(long other) {
-        return getChannel().getMessagesBetweenAsStream(getId(), other);
+    default Optional<Stream<Message>> getMessagesBetweenAsStream(long other) {
+        return getChannel().map(channel -> channel.getMessagesBetweenAsStream(getId(), other));
     }
 
     /**
@@ -1383,7 +1397,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @see TextChannel#getMessagesBetweenAsStream(long, long)
      * @see #getMessagesBetween(long)
      */
-    default Stream<Message> getMessagesBetweenAsStream(Message other) {
+    default Optional<Stream<Message>> getMessagesBetweenAsStream(Message other) {
         return getMessagesBetweenAsStream(other.getId());
     }
 
@@ -1420,7 +1434,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      */
     default boolean canDelete(User user) {
         // You cannot delete messages in channels you cannot see
-        if (!getChannel().canSee(user)) {
+        if (!getChannel().map(channel -> channel.canSee(user)).orElse(false)) {
             return false;
         }
         // The user can see the message and is the author
@@ -1437,7 +1451,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The sent message.
      */
     default CompletableFuture<Message> reply(String messageContent) {
-        return new MessageBuilder().replyTo(getId()).setContent(messageContent).send(getChannel());
+        return new MessageBuilder().replyTo(getId()).setContent(messageContent).send(getApi(), getChannelId());
     }
 
     /**
@@ -1447,7 +1461,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
      * @return The sent message.
      */
     default CompletableFuture<Message> reply(EmbedBuilder embed) {
-        return new MessageBuilder().replyTo(getId()).setEmbed(embed).send(getChannel());
+        return new MessageBuilder().replyTo(getId()).setEmbed(embed).send(getApi(), getChannelId());
     }
 
     /**
@@ -1466,7 +1480,7 @@ public interface Message extends DiscordEntity, Comparable<Message>, UpdatableFr
 
     @Override
     default CompletableFuture<Message> getLatestInstance() {
-        return getChannel().getMessageById(getId());
+        return getApi().getMessageById(getId(), getChannelId());
     }
 
 }

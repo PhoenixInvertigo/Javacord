@@ -19,7 +19,7 @@ public abstract class CertainMessageEventImpl extends MessageEventImpl implement
      * @param message The message.
      */
     public CertainMessageEventImpl(Message message) {
-        super(message.getApi(), message.getId(), message.getChannel());
+        super(message.getApi(), message.getId(), message.getChannelId());
         this.message = message;
     }
 

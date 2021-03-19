@@ -1,7 +1,6 @@
 package org.javacord.core.event.message.reaction;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.event.message.reaction.ReactionRemoveEvent;
 
@@ -15,12 +14,12 @@ public class ReactionRemoveEventImpl extends SingleReactionEventImpl implements 
      *
      * @param api The discord api instance.
      * @param messageId The id of the message.
-     * @param channel The text channel in which the message was sent.
+     * @param channelId The id of the text channel in which the message was sent.
      * @param emoji The emoji.
      * @param userId The id of the user whose reaction got removed.
      */
-    public ReactionRemoveEventImpl(DiscordApi api, long messageId, TextChannel channel, Emoji emoji, long userId) {
-        super(api, messageId, channel, emoji, userId);
+    public ReactionRemoveEventImpl(DiscordApi api, long messageId, long channelId, Emoji emoji, long userId) {
+        super(api, messageId, channelId, emoji, userId);
     }
 
 }

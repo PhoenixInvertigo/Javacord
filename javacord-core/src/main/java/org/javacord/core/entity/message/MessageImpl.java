@@ -52,6 +52,16 @@ public class MessageImpl implements Message, InternalMessageAttachableListenerMa
     private final TextChannel channel;
 
     /**
+     * The id of the server of the channel.
+     */
+    private final Long serverId;
+
+    /**
+     * The id of the channel of the message.
+     */
+    private final long channelId;
+
+    /**
      * The id of the message.
      */
     private final long id;
@@ -105,6 +115,7 @@ public class MessageImpl implements Message, InternalMessageAttachableListenerMa
      * The id of the message referenced via message reply.
      */
     private final Long referencedMessageId;
+
     /**
      * The message referenced via message reply.
      */
@@ -149,7 +160,10 @@ public class MessageImpl implements Message, InternalMessageAttachableListenerMa
      */
     public MessageImpl(DiscordApiImpl api, TextChannel channel, JsonNode data) {
         this.api = api;
-        this.channel = channel;
+        this.channel = channel; // can be null
+
+        channelId = data.get("channel_id").asLong();
+        serverId = data.hasNonNull("guild_id") ? data.get("guild_id").asLong() : null;
 
         id = data.get("id").asLong();
         content = data.get("content").asText();
@@ -167,8 +181,10 @@ public class MessageImpl implements Message, InternalMessageAttachableListenerMa
         Long webhookId = data.has("webhook_id") ? data.get("webhook_id").asLong() : null;
         author = new MessageAuthorImpl(this, webhookId, data);
 
-        MessageCacheImpl cache = (MessageCacheImpl) channel.getMessageCache();
-        cache.addMessage(this);
+        if (channel != null) {
+            MessageCacheImpl cache = (MessageCacheImpl) channel.getMessageCache();
+            cache.addMessage(this);
+        }
 
         if (data.has("embeds")) {
             for (JsonNode embedJson : data.get("embeds")) {
@@ -367,8 +383,25 @@ public class MessageImpl implements Message, InternalMessageAttachableListenerMa
     }
 
     @Override
-    public TextChannel getChannel() {
-        return channel;
+    public boolean isServerMessage() {
+        return serverId != null;
+    }
+
+    @Override
+    public Optional<Long> getServerId() {
+        return Optional.ofNullable(serverId);
+    }
+
+    @Override
+    public Optional<TextChannel> getChannel() {
+        return channel == null
+                ? api.getTextChannelById(channelId)
+                : Optional.of(channel);
+    }
+
+    @Override
+    public long getChannelId() {
+        return channelId;
     }
 
     @Override

@@ -1,12 +1,11 @@
 package org.javacord.core.event.message.reaction;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Reaction;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.reaction.SingleReactionEvent;
-import org.javacord.core.event.message.RequestableMessageEventImpl;
+import org.javacord.core.event.message.OptionalMessageEventImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * The implementation of {@link SingleReactionEvent}.
  */
-public abstract class SingleReactionEventImpl extends RequestableMessageEventImpl implements SingleReactionEvent {
+public abstract class SingleReactionEventImpl extends OptionalMessageEventImpl implements SingleReactionEvent {
 
     /**
      * The emoji of the event.
@@ -32,12 +31,12 @@ public abstract class SingleReactionEventImpl extends RequestableMessageEventImp
      *
      * @param api The discord api instance.
      * @param messageId The id of the message.
-     * @param channel The text channel in which the message was sent.
+     * @param channelId The id of the text channel in which the message was sent.
      * @param emoji The emoji.
      * @param userId The id of the "owner" of the reaction.
      */
-    public SingleReactionEventImpl(DiscordApi api, long messageId, TextChannel channel, Emoji emoji, long userId) {
-        super(api, messageId, channel);
+    public SingleReactionEventImpl(DiscordApi api, long messageId, long channelId, Emoji emoji, long userId) {
+        super(api, messageId, channelId);
         this.emoji = emoji;
         this.userId = userId;
     }
@@ -74,7 +73,7 @@ public abstract class SingleReactionEventImpl extends RequestableMessageEventImp
 
     @Override
     public CompletableFuture<List<User>> getUsers() {
-        return Reaction.getUsers(getApi(), getChannel().getId(), getMessageId(), getEmoji());
+        return Reaction.getUsers(getApi(), getChannelId(), getMessageId(), getEmoji());
     }
 
 }

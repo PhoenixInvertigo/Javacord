@@ -45,7 +45,7 @@ public interface Reaction {
      */
     default CompletableFuture<List<User>> getUsers() {
         return Reaction.getUsers(
-                getMessage().getApi(), getMessage().getChannel().getId(), getMessage().getId(), getEmoji());
+                getMessage().getApi(), getMessage().getChannelId(), getMessage().getId(), getEmoji());
     }
 
     /**
@@ -85,7 +85,7 @@ public interface Reaction {
      * @return A future to tell us if the action was successful.
      */
     default CompletableFuture<Void> removeUser(User user) {
-        return Reaction.removeUser(getMessage().getApi(), getMessage().getChannel().getId(), getMessage().getId(),
+        return Reaction.removeUser(getMessage().getApi(), getMessage().getChannelId(), getMessage().getId(),
                 getEmoji(), user.getId());
     }
 

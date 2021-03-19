@@ -7,6 +7,7 @@ import org.javacord.api.entity.Icon;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.channel.Categorizable;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.webhook.Webhook;
@@ -319,7 +320,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
      */
     default boolean canSeeChannel() {
         return asUser()
-                .map(getMessage().getChannel()::canSee)
+                .flatMap(user ->
+                        getMessage().getChannel().map(channel -> channel.canSee(user)))
                 .orElse(false);
     }
 
@@ -333,7 +335,7 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canSeeAllChannelsInCategory() {
         return getMessage()
                 .getChannel()
-                .asCategorizable()
+                .flatMap(TextChannel::asCategorizable)
                 .flatMap(Categorizable::getCategory)
                 .map(channelCategory -> asUser().map(channelCategory::canSeeAll).orElse(false))
                 .orElse(true);
@@ -348,7 +350,7 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canCreateInstantInviteToTextChannel() {
         return getMessage()
                 .getChannel()
-                .asServerChannel()
+                .flatMap(TextChannel::asServerChannel)
                 .flatMap(serverChannel -> asUser().map(serverChannel::canCreateInstantInvite))
                 .orElse(false);
     }
@@ -365,9 +367,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canWriteInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canWrite).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -383,9 +384,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canUseExternalEmojisInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canUseExternalEmojis).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -400,9 +400,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canEmbedLinksInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canEmbedLinks).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -416,9 +415,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canReadMessageHistoryOfTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canReadMessageHistory).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -433,9 +431,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canUseTtsInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canUseTts).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -447,9 +444,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canAttachFilesToTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canAttachFiles).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -461,9 +457,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canAddNewReactionsInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canAddNewReactions).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -477,9 +472,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canManageMessagesInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canManageMessages).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -493,9 +487,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canRemoveReactionsOfOthersInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canRemoveReactionsOfOthers).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -509,9 +502,8 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
     default boolean canMentionEveryoneInTextChannel() {
         return getMessage()
                 .getChannel()
-                .asTextChannel()
                 .map(textChannel -> asUser().map(textChannel::canMentionEveryone).orElse(false))
-                .orElseThrow(AssertionError::new);
+                .orElse(false);
     }
 
     /**
@@ -523,11 +515,7 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
      * @return Whether the author can connect to the voice channel or not.
      */
     default boolean canConnectToVoiceChannel() {
-        return getMessage()
-                .getChannel()
-                .asVoiceChannel()
-                .flatMap(voiceChannel -> asUser().map(voiceChannel::canConnect))
-                .orElse(false);
+        return false;
     }
 
     /**
@@ -538,11 +526,7 @@ public interface MessageAuthor extends DiscordEntity, Nameable {
      * @return Whether the author can mute other users in the voice channel or not.
      */
     default boolean canMuteUsersInVoiceChannel() {
-        return getMessage()
-                .getChannel()
-                .asVoiceChannel()
-                .flatMap(voiceChannel -> asUser().map(voiceChannel::canMuteUsers))
-                .orElse(false);
+        return false;
     }
 
     /**

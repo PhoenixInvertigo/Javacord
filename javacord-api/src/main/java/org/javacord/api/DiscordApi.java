@@ -953,10 +953,9 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * @param id The id of the message.
      * @param channel The channel of the message.
      * @return The message with the given id.
-     * @see TextChannel#getMessageById(long)
      */
     default CompletableFuture<Message> getMessageById(long id, TextChannel channel) {
-        return channel.getMessageById(id);
+        return getMessageById(id, channel.getId());
     }
 
     /**
@@ -965,11 +964,30 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * @param id The id of the message.
      * @param channel The channel of the message.
      * @return The message with the given id.
-     * @see TextChannel#getMessageById(String)
      */
     default CompletableFuture<Message> getMessageById(String id, TextChannel channel) {
-        return channel.getMessageById(id);
+        return getMessageById(Long.parseUnsignedLong(id), channel.getId());
     }
+
+    /**
+     * Gets a message by its id.
+     *
+     * @param messageId The id of the message.
+     * @param channelId The id of the channel.
+     * @return The message with the given id.
+     */
+    default CompletableFuture<Message> getMessageById(String messageId, String channelId) {
+        return getMessageById(Long.parseUnsignedLong(messageId), Long.parseUnsignedLong(channelId));
+    }
+
+    /**
+     * Gets a message by its id.
+     *
+     * @param messageId The id of the message.
+     * @param channelId The id of the channel.
+     * @return The message with the given id.
+     */
+    CompletableFuture<Message> getMessageById(long messageId, long channelId);
 
     /**
      * Gets a message by its link.
@@ -978,15 +996,14 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * @return The message with the given link.
      * @throws IllegalArgumentException If the link isn't valid.
      */
-    default Optional<CompletableFuture<Message>> getMessageByLink(String link) throws IllegalArgumentException {
+    default CompletableFuture<Message> getMessageByLink(String link) throws IllegalArgumentException {
         Matcher matcher = DiscordRegexPattern.MESSAGE_LINK.matcher(link);
 
         if (!matcher.matches()) {
             throw new IllegalArgumentException("The message link has an invalid format");
         }
 
-        return getTextChannelById(matcher.group("channel"))
-                .map(textChannel -> textChannel.getMessageById(matcher.group("message")));
+        return getMessageById(matcher.group("message"), matcher.group("channel"));
     }
 
     /**
@@ -1004,7 +1021,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
         }
 
         return getCachedMessageById(matcher.group("message"))
-                .filter(message -> message.getChannel().getIdAsString().equals(matcher.group("channel")));
+                .filter(message -> message.getChannelIdAsString().equals(matcher.group("channel")));
     }
 
     /**

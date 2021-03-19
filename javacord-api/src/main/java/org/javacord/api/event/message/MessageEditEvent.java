@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * A message delete event.
  */
-public interface MessageEditEvent extends RequestableMessageEvent {
+public interface MessageEditEvent extends OptionalMessageEvent {
 
     /**
      * Gets the new content of the message.

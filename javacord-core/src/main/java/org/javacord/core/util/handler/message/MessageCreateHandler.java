@@ -17,9 +17,6 @@ import org.javacord.core.event.channel.user.PrivateChannelCreateEventImpl;
 import org.javacord.core.event.message.MessageCreateEventImpl;
 import org.javacord.core.util.event.DispatchQueueSelector;
 import org.javacord.core.util.gateway.PacketHandler;
-import org.javacord.core.util.rest.RestEndpoint;
-import org.javacord.core.util.rest.RestMethod;
-import org.javacord.core.util.rest.RestRequest;
 
 import java.util.Optional;
 
@@ -46,20 +43,14 @@ public class MessageCreateHandler extends PacketHandler {
         if (!packet.hasNonNull("guild_id") && !api.getTextChannelById(channelId).isPresent()) {
             UserImpl author = new UserImpl(api, packet.get("author"), (MemberImpl) null, null);
 
-            PrivateChannel privateChannel;
-            if (author.isYourself()) {
-                // request private channel from discord
-                privateChannel = new RestRequest<PrivateChannel>(api, RestMethod.GET, RestEndpoint.CHANNEL)
-                        .setUrlParameters(channelId)
-                        .execute(result -> new PrivateChannelImpl(api, result.getJsonBody()))
-                        .join(); // wait for the result of the request to keep the order of events correct.
-            } else {
-                // create private channel
+            PrivateChannel privateChannel = null;
+            if (!author.isYourself()) {
+                // create private channel if the author is the recipient of the channel
                 privateChannel = new PrivateChannelImpl(api, channelId, author);
+                // dispatch private channel create event
+                PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
+                api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, privateChannel.getRecipient(), event);
             }
-            // dispatch PrivateChannelCreateEvent
-            PrivateChannelCreateEvent event = new PrivateChannelCreateEventImpl(privateChannel);
-            api.getEventDispatcher().dispatchPrivateChannelCreateEvent(api, privateChannel.getRecipient(), event);
 
             handle(privateChannel, packet);
             return;
@@ -72,7 +63,9 @@ public class MessageCreateHandler extends PacketHandler {
         Message message = api.getOrCreateMessage(channel, packet);
         MessageCreateEvent event = new MessageCreateEventImpl(message);
 
-        Optional<Server> optionalServer = channel.asServerChannel().map(ServerChannel::getServer);
+        Optional<Server> optionalServer = channel == null
+                ? Optional.empty() // if channel is null there is no channel to get the server from
+                : channel.asServerChannel().map(ServerChannel::getServer);
         MessageAuthor author = message.getAuthor();
         api.getEventDispatcher().dispatchMessageCreateEvent(
                 optionalServer.map(DispatchQueueSelector.class::cast).orElse(api),

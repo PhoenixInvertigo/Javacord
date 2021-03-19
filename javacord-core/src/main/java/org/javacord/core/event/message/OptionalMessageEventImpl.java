@@ -1,7 +1,6 @@
 package org.javacord.core.event.message;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.event.message.OptionalMessageEvent;
 
@@ -22,10 +21,10 @@ public abstract class OptionalMessageEventImpl extends MessageEventImpl implemen
      *
      * @param api The discord api instance.
      * @param messageId The id of the message.
-     * @param channel The text channel in which the message was sent.
+     * @param channelId The id of the text channel in which the message was sent.
      */
-    public OptionalMessageEventImpl(DiscordApi api, long messageId, TextChannel channel) {
-        super(api, messageId, channel);
+    public OptionalMessageEventImpl(DiscordApi api, long messageId, long channelId) {
+        super(api, messageId, channelId);
         message = api.getCachedMessageById(messageId).orElse(null);
     }
 
