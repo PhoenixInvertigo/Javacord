@@ -4,11 +4,14 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.audio.internal.AudioSourceBaseDelegate;
 import org.javacord.api.entity.channel.GroupChannel;
 import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.ServerStageVoiceChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.internal.ChannelCategoryBuilderDelegate;
 import org.javacord.api.entity.channel.internal.GroupChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerChannelUpdaterDelegate;
+import org.javacord.api.entity.channel.internal.ServerStageVoiceChannelBuilderDelegate;
+import org.javacord.api.entity.channel.internal.ServerStageVoiceChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerTextChannelBuilderDelegate;
 import org.javacord.api.entity.channel.internal.ServerTextChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerVoiceChannelBuilderDelegate;
@@ -177,6 +180,16 @@ public class DelegateFactory {
     }
 
     /**
+     * Creates a new server stage voice channel builder delegate.
+     *
+     * @param server The server of the server stage voice channel.
+     * @return A new server stage voice channel builder delegate.
+     */
+    public static ServerStageVoiceChannelBuilderDelegate createServerStageVoiceChannelBuilderDelegate(Server server) {
+        return delegateFactoryDelegate.createServerStageVoiceChannelBuilderDelegate(server);
+    }
+
+    /**
      * Creates a new custom emoji builder delegate.
      *
      * @param server The server of the custom emoji.
@@ -275,6 +288,17 @@ public class DelegateFactory {
     public static ServerVoiceChannelUpdaterDelegate createServerVoiceChannelUpdaterDelegate(
             ServerVoiceChannel channel) {
         return delegateFactoryDelegate.createServerVoiceChannelUpdaterDelegate(channel);
+    }
+
+    /**
+     * Creates a new server stage voice channel updater delegate.
+     *
+     * @param channel The channel to update.
+     * @return A new server stage voice channel updater delegate.
+     */
+    public static ServerStageVoiceChannelUpdaterDelegate createServerStageVoiceChannelUpdaterDelegate(
+            ServerStageVoiceChannel channel) {
+        return delegateFactoryDelegate.createServerStageVoiceChannelUpdaterDelegate(channel);
     }
 
     /**

@@ -2,9 +2,15 @@ package org.javacord.core.event.channel.server.voice;
 
 import org.javacord.api.entity.channel.ServerStageVoiceChannel;
 import org.javacord.api.event.channel.server.voice.ServerStageVoiceChannelChangeTopicEvent;
+import org.javacord.core.event.server.ServerEventImpl;
 
-public class ServerStageVoiceChannelChangeTopicEventImpl extends ServerVoiceChannelEventImpl
+public class ServerStageVoiceChannelChangeTopicEventImpl extends ServerEventImpl
         implements ServerStageVoiceChannelChangeTopicEvent {
+
+    /**
+     * The channel of the event.
+     */
+    protected final ServerStageVoiceChannel channel;
 
     /**
      * The new topic of the channel.
@@ -26,7 +32,8 @@ public class ServerStageVoiceChannelChangeTopicEventImpl extends ServerVoiceChan
 
     public ServerStageVoiceChannelChangeTopicEventImpl(ServerStageVoiceChannel channel, String newTopic,
                                                        String oldTopic) {
-        super(channel);
+        super(channel.getServer());
+        this.channel = channel;
         this.newTopic = newTopic;
         this.oldTopic = oldTopic;
     }
@@ -43,7 +50,7 @@ public class ServerStageVoiceChannelChangeTopicEventImpl extends ServerVoiceChan
 
     @Override
     public ServerStageVoiceChannel getChannel() {
-        return (ServerStageVoiceChannel) channel;
+        return channel;
     }
 
 }

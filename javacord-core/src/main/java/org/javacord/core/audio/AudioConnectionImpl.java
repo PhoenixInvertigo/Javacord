@@ -5,7 +5,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.audio.AudioConnection;
 import org.javacord.api.audio.AudioSource;
 import org.javacord.api.audio.SpeakingFlag;
-import org.javacord.api.entity.channel.ServerVoiceChannel;
+import org.javacord.api.entity.channel.BasicServerVoiceChannel;
 import org.javacord.core.DiscordApiImpl;
 import org.javacord.core.entity.server.ServerImpl;
 import org.javacord.core.listener.audio.InternalAudioConnectionAttachableListenerManager;
@@ -41,7 +41,7 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
     /**
      * The voice channel of the audio connection.
      */
-    private volatile ServerVoiceChannel channel;
+    private volatile BasicServerVoiceChannel channel;
 
     /**
      * A future that finishes once the connection is fully established.
@@ -114,7 +114,7 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
      * @param channel The channel of the audio connection.
      * @param readyFuture An uncompleted future that gets completed when the connection is fully established.
      */
-    public AudioConnectionImpl(ServerVoiceChannel channel, CompletableFuture<AudioConnection> readyFuture) {
+    public AudioConnectionImpl(BasicServerVoiceChannel channel, CompletableFuture<AudioConnection> readyFuture) {
         this.channel = channel;
         this.readyFuture = readyFuture;
         id = idCounter.getAndIncrement();
@@ -173,7 +173,7 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
      *
      * @param channel The channel of the connection.
      */
-    public void setChannel(ServerVoiceChannel channel) {
+    public void setChannel(BasicServerVoiceChannel channel) {
         this.channel = channel;
     }
 
@@ -280,8 +280,12 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
         connectingOrConnected = true;
         logger.debug("Received all information required to connect to voice channel {}", getChannel());
         websocketAdapter = new AudioWebSocketAdapter(this);
-        channel = channel.getCurrentCachedInstance().orElse(channel);
+        updateChannel();
         return true;
+    }
+
+    private void updateChannel() {
+        channel.getCurrentCachedInstance().ifPresent(currentInstance -> channel = currentInstance);
     }
 
     /**
@@ -331,12 +335,12 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
     }
 
     @Override
-    public CompletableFuture<Void> moveTo(ServerVoiceChannel destChannel) {
+    public CompletableFuture<Void> moveTo(BasicServerVoiceChannel destChannel) {
         return moveTo(destChannel, muted, deafened);
     }
 
     @Override
-    public CompletableFuture<Void> moveTo(ServerVoiceChannel destChannel, boolean selfMute, boolean selfDeafen) {
+    public CompletableFuture<Void> moveTo(BasicServerVoiceChannel destChannel, boolean selfMute, boolean selfDeafen) {
         movingFuture = new CompletableFuture<>();
         if (!destChannel.getServer().equals(getChannel().getServer())) {
             movingFuture.completeExceptionally(
@@ -382,8 +386,9 @@ public class AudioConnectionImpl implements AudioConnection, InternalAudioConnec
     }
 
     @Override
-    public ServerVoiceChannel getChannel() {
-        return channel.getCurrentCachedInstance().orElse(channel);
+    public BasicServerVoiceChannel getChannel() {
+        updateChannel();
+        return channel;
     }
 
     @Override

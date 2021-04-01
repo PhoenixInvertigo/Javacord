@@ -2,7 +2,7 @@ package org.javacord.api.event.audio;
 
 import org.javacord.api.audio.AudioConnection;
 import org.javacord.api.audio.AudioSource;
-import org.javacord.api.entity.channel.ServerVoiceChannel;
+import org.javacord.api.entity.channel.BasicServerVoiceChannel;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.Event;
 
@@ -30,7 +30,7 @@ public interface AudioSourceEvent extends Event {
      *
      * @return The server voice channel of the event.
      */
-    default ServerVoiceChannel getChannel() {
+    default BasicServerVoiceChannel getChannel() {
         return getConnection().getChannel();
     }
 

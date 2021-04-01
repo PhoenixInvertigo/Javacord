@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.Javacord;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.activity.Activity;
-import org.javacord.api.entity.channel.ServerVoiceChannel;
+import org.javacord.api.entity.channel.BasicServerVoiceChannel;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
@@ -756,7 +756,7 @@ public class DiscordWebSocketAdapter extends WebSocketAdapter {
      * @param selfDeafened Whether to self-deafen on the given server. If {@code null}, current state remains unchanged.
      */
     public void sendVoiceStateUpdate(
-            Server server, ServerVoiceChannel channel, Boolean selfMuted, Boolean selfDeafened) {
+            Server server, BasicServerVoiceChannel channel, Boolean selfMuted, Boolean selfDeafened) {
         ObjectNode updateVoiceStatePacket = JsonNodeFactory.instance.objectNode()
                 .put("op", GatewayOpcode.VOICE_STATE_UPDATE.getCode());
         if (server == null) {

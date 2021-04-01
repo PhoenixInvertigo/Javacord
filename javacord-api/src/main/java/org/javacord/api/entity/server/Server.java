@@ -10,6 +10,7 @@ import org.javacord.api.entity.VanityUrlCode;
 import org.javacord.api.entity.auditlog.AuditLog;
 import org.javacord.api.entity.auditlog.AuditLogActionType;
 import org.javacord.api.entity.auditlog.AuditLogEntry;
+import org.javacord.api.entity.channel.BasicServerVoiceChannel;
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.ChannelCategoryBuilder;
 import org.javacord.api.entity.channel.ServerChannel;
@@ -2327,6 +2328,32 @@ public interface Server extends DiscordEntity, Nameable, UpdatableFromCache<Serv
                 getTextChannels().stream()
                         .filter(channel -> channel.getName().equalsIgnoreCase(name))
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Gets a voice channel by its id.
+     *
+     * @param id The id of the voice channel.
+     * @return The voice channel with the given id.
+     */
+    default Optional<BasicServerVoiceChannel> getBasicVoiceChannelById(long id) {
+        return getChannelById(id)
+                .filter(channel -> channel instanceof BasicServerVoiceChannel)
+                .map(channel -> (BasicServerVoiceChannel) channel);
+    }
+
+    /**
+     * Gets a voice channel by its id.
+     *
+     * @param id The id of the voice channel.
+     * @return The voice channel with the given id.
+     */
+    default Optional<BasicServerVoiceChannel> getBasicVoiceChannelById(String id) {
+        try {
+            return getBasicVoiceChannelById(Long.parseLong(id));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     /**

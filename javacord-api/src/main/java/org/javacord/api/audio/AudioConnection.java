@@ -1,6 +1,6 @@
 package org.javacord.api.audio;
 
-import org.javacord.api.entity.channel.ServerVoiceChannel;
+import org.javacord.api.entity.channel.BasicServerVoiceChannel;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.listener.audio.AudioConnectionAttachableListenerManager;
 
@@ -17,7 +17,7 @@ public interface AudioConnection extends AudioConnectionAttachableListenerManage
      * @param destChannel The channel to move to.
      * @return A CompletableFuture indicating whether or not the move was successful.
      */
-    CompletableFuture<Void> moveTo(ServerVoiceChannel destChannel);
+    CompletableFuture<Void> moveTo(BasicServerVoiceChannel destChannel);
 
     /**
      * Moves the connection to a different channel.
@@ -28,7 +28,7 @@ public interface AudioConnection extends AudioConnectionAttachableListenerManage
      * @param selfDeafen  Whether or not to be self-deafened on join.
      * @return A CompletableFuture indicating whether or not the move was successful.
      */
-    CompletableFuture<Void> moveTo(ServerVoiceChannel destChannel, boolean selfMute, boolean selfDeafen);
+    CompletableFuture<Void> moveTo(BasicServerVoiceChannel destChannel, boolean selfMute, boolean selfDeafen);
 
     /**
      * Disconnects from the voice channel.
@@ -63,7 +63,7 @@ public interface AudioConnection extends AudioConnectionAttachableListenerManage
      *
      * @return The voice channel of the audio connection.
      */
-    ServerVoiceChannel getChannel();
+    BasicServerVoiceChannel getChannel();
 
     /**
      * Gets the self-muted status of this connection.

@@ -45,6 +45,7 @@ import org.javacord.core.entity.IconImpl;
 import org.javacord.core.entity.VanityUrlCodeImpl;
 import org.javacord.core.entity.activity.ActivityImpl;
 import org.javacord.core.entity.auditlog.AuditLogImpl;
+import org.javacord.core.entity.channel.BasicServerVoiceChannelImpl;
 import org.javacord.core.entity.channel.ChannelCategoryImpl;
 import org.javacord.core.entity.channel.ServerChannelImpl;
 import org.javacord.core.entity.channel.ServerStageVoiceChannelImpl;
@@ -348,7 +349,6 @@ public class ServerImpl implements Server, Cleanupable, InternalServerAttachable
                         getOrCreateServerVoiceChannel(channel);
                         break;
                     case SERVER_STAGE_VOICE_CHANNEL:
-                        // TODO Handle them different from voice channel:
                         getOrCreateServerStageVoiceChannel(channel);
                         break;
                     case CHANNEL_CATEGORY:
@@ -384,8 +384,8 @@ public class ServerImpl implements Server, Cleanupable, InternalServerAttachable
 
         if (data.hasNonNull("voice_states")) {
             for (JsonNode voiceStateJson : data.get("voice_states")) {
-                ServerVoiceChannelImpl channel =
-                        (ServerVoiceChannelImpl) getVoiceChannelById(voiceStateJson.get("channel_id").asLong())
+                BasicServerVoiceChannelImpl channel = (BasicServerVoiceChannelImpl)
+                        getBasicVoiceChannelById(voiceStateJson.get("channel_id").asLong())
                                 .orElseThrow(AssertionError::new);
                 channel.addConnectedUser(voiceStateJson.get("user_id").asLong());
             }

@@ -8,7 +8,7 @@ import org.javacord.core.listener.channel.server.voice.InternalServerStageVoiceC
 
 import java.util.Optional;
 
-public class ServerStageVoiceChannelImpl extends ServerVoiceChannelImpl
+public class ServerStageVoiceChannelImpl extends BasicServerVoiceChannelImpl
         implements ServerStageVoiceChannel, InternalServerStageVoiceChannelAttachableListenerManager {
 
     /**
@@ -46,6 +46,11 @@ public class ServerStageVoiceChannelImpl extends ServerVoiceChannelImpl
      */
     public void setTopic(String topic) {
         this.topic = topic;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ServerStageVoiceChannel (id: %s, name: %s)", getIdAsString(), getName());
     }
 
 }

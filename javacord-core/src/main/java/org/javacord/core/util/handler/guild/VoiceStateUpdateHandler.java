@@ -11,6 +11,7 @@ import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberJoinE
 import org.javacord.api.event.channel.server.voice.ServerVoiceChannelMemberLeaveEvent;
 import org.javacord.api.event.server.VoiceStateUpdateEvent;
 import org.javacord.core.audio.AudioConnectionImpl;
+import org.javacord.core.entity.channel.BasicServerVoiceChannelImpl;
 import org.javacord.core.entity.channel.GroupChannelImpl;
 import org.javacord.core.entity.channel.PrivateChannelImpl;
 import org.javacord.core.entity.channel.ServerVoiceChannelImpl;
@@ -97,11 +98,11 @@ public class VoiceStateUpdateHandler extends PacketHandler {
         api.getPossiblyUnreadyServerById(packet.get("guild_id").asLong())
                 .map(ServerImpl.class::cast).ifPresent(server -> {
                     Member member = new MemberImpl(api, server, packet.get("member"), null);
-                    Optional<ServerVoiceChannelImpl> oldChannel = server
+                    Optional<BasicServerVoiceChannelImpl> oldChannel = server
                             .getConnectedVoiceChannel(userId)
-                            .map(ServerVoiceChannelImpl.class::cast);
+                            .map(BasicServerVoiceChannelImpl.class::cast);
 
-                    Optional<ServerVoiceChannelImpl> newChannel;
+                    Optional<BasicServerVoiceChannelImpl> newChannel;
                     if (packet.hasNonNull("channel_id")) {
                         newChannel = server
                                 .getVoiceChannelById(packet.get("channel_id").asLong())
