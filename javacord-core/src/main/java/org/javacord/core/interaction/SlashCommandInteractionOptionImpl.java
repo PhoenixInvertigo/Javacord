@@ -41,98 +41,61 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
         name = jsonData.get("name").asText();
         JsonNode valueNode = jsonData.get("value");
 
-        int type = jsonData.get("type").asInt();
-        if (type == 3) {
-            stringValue = valueNode.asText();
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = stringValue;
-        } else if (type == 4) {
-            stringValue = null;
-            intValue = valueNode.asInt();
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = String.valueOf(intValue);
-        } else if (type == 5) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = valueNode.asBoolean();
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = String.valueOf(booleanValue);
-        } else if (type == 6) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = Long.parseLong(valueNode.asText());
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = String.valueOf(userValue);
-        } else if (type == 7) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = Long.parseLong(valueNode.asText());
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = String.valueOf(channelValue);
-        } else if (type == 8) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = Long.parseLong(valueNode.asText());
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = String.valueOf(roleValue);
-        } else if (type == 9) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = Long.parseLong(valueNode.asText());
-            numberValue = null;
-            stringRepresentation = String.valueOf(mentionableValue);
-        } else if (type == 10) {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = valueNode.asDouble();
-            stringRepresentation = String.valueOf(numberValue);
-        } else {
-            stringValue = null;
-            intValue = null;
-            booleanValue = null;
-            userValue = null;
-            channelValue = null;
-            roleValue = null;
-            mentionableValue = null;
-            numberValue = null;
-            stringRepresentation = null;
+
+        String stringRepresentation = null;
+        String stringValue = null;
+        Integer intValue = null;
+        Boolean booleanValue = null;
+        Long userValue = null;
+        Long channelValue = null;
+        Long roleValue = null;
+        Long mentionableValue = null;
+        Double numberValue = null;
+
+        switch (jsonData.get("type").asInt()) {
+            case 3:
+                stringValue = valueNode.asText();
+                stringRepresentation = stringValue;
+                break;
+            case 4:
+                intValue = valueNode.asInt();
+                stringRepresentation = String.valueOf(intValue);
+                break;
+            case 5:
+                booleanValue = valueNode.asBoolean();
+                stringRepresentation = String.valueOf(booleanValue);
+                break;
+            case 6:
+                userValue = Long.parseLong(valueNode.asText());
+                stringRepresentation = String.valueOf(userValue);
+                break;
+            case 7:
+                channelValue = Long.parseLong(valueNode.asText());
+                stringRepresentation = String.valueOf(channelValue);
+                break;
+            case 8:
+                roleValue = Long.parseLong(valueNode.asText());
+                stringRepresentation = String.valueOf(roleValue);
+                break;
+            case 9:
+                mentionableValue = Long.parseLong(valueNode.asText());
+                stringRepresentation = String.valueOf(mentionableValue);
+                break;
+            case 10:
+                numberValue = valueNode.asDouble();
+                stringRepresentation = String.valueOf(numberValue);
+                break;
         }
+
+        this.stringRepresentation = stringRepresentation;
+        this.stringValue = stringValue;
+        this.intValue = intValue;
+        this.booleanValue = booleanValue;
+        this.userValue = userValue;
+        this.channelValue = channelValue;
+        this.roleValue = roleValue;
+        this.mentionableValue = mentionableValue;
+        this.numberValue = numberValue;
 
         options = new ArrayList<>();
         if (jsonData.has("options") && jsonData.get("options").isArray()) {
